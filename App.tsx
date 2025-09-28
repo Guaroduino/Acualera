@@ -7,6 +7,8 @@ import ImageDisplay from './components/ImageDisplay';
 import Spinner from './components/Spinner';
 import Button from './components/Button';
 import Alert from './components/Alert';
+import { useLocalization } from './contexts/LocalizationContext';
+import { TranslationKey } from './localization/translations';
 
 const WandIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -23,6 +25,7 @@ const DownloadIcon = () => (
 
 
 const App: React.FC = () => {
+    const { t } = useLocalization();
     const [originalImage, setOriginalImage] = useState<File | null>(null);
     const [originalImagePreview, setOriginalImagePreview] = useState<string | null>(null);
     const [watercolorImage, setWatercolorImage] = useState<string | null>(null);
@@ -36,7 +39,7 @@ const App: React.FC = () => {
     const handleImageUpload = useCallback((file: File) => {
         const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
         if (!validTypes.includes(file.type)) {
-            setError('Invalid file type. Please upload a JPG, PNG, or WEBP image.');
+            setError(t('errorInvalidFileType'));
             setProcessState(ProcessState.ERROR);
             return;
         }
@@ -51,11 +54,11 @@ const App: React.FC = () => {
             setOriginalImagePreview(reader.result as string);
         };
         reader.readAsDataURL(file);
-    }, []);
+    }, [t]);
 
     const handleConvertClick = async () => {
         if (!originalImagePreview) {
-            setError('Please upload an image first.');
+            setError(t('errorNoImage'));
             setProcessState(ProcessState.ERROR);
             return;
         }
@@ -71,15 +74,15 @@ const App: React.FC = () => {
             const base64Data = parts[1];
 
             if (!mimeType || !base64Data) {
-                throw new Error('Could not parse image data.');
+                 throw new Error('errorParse');
             }
 
             const resultImageUrl = await convertToWatercolor(base64Data, mimeType, brushStrokeBoldness, colorSaturation, paperTexture, pencilDetail);
             setWatercolorImage(resultImageUrl);
             setProcessState(ProcessState.SUCCESS);
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred.';
-            setError(errorMessage);
+            const errorMessageKey = err instanceof Error ? err.message : 'errorApiUnknown';
+            setError(t(errorMessageKey as TranslationKey));
             setProcessState(ProcessState.ERROR);
         }
     };
@@ -112,7 +115,7 @@ const App: React.FC = () => {
         <div className="w-full max-w-lg mx-auto flex flex-col items-center gap-6 p-6 bg-white rounded-lg shadow-md">
             <div className="w-full">
                 <div className="flex justify-between items-center mb-2">
-                    <label htmlFor="brush-stroke-slider" className="font-semibold text-gray-700">Brush Stroke Boldness</label>
+                    <label htmlFor="brush-stroke-slider" className="font-semibold text-gray-700">{t('brushStrokeLabel')}</label>
                     <span className="text-sm font-medium text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full">{brushStrokeBoldness}</span>
                 </div>
                 <input
@@ -129,7 +132,7 @@ const App: React.FC = () => {
             </div>
              <div className="w-full">
                 <div className="flex justify-between items-center mb-2">
-                    <label htmlFor="saturation-slider" className="font-semibold text-gray-700">Color Saturation</label>
+                    <label htmlFor="saturation-slider" className="font-semibold text-gray-700">{t('colorSaturationLabel')}</label>
                     <span className="text-sm font-medium text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full">{colorSaturation}</span>
                 </div>
                 <input
@@ -146,7 +149,7 @@ const App: React.FC = () => {
             </div>
              <div className="w-full">
                 <div className="flex justify-between items-center mb-2">
-                    <label htmlFor="texture-slider" className="font-semibold text-gray-700">Paper Texture</label>
+                    <label htmlFor="texture-slider" className="font-semibold text-gray-700">{t('paperTextureLabel')}</label>
                     <span className="text-sm font-medium text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full">{paperTexture}</span>
                 </div>
                 <input
@@ -163,7 +166,7 @@ const App: React.FC = () => {
             </div>
             <div className="w-full">
                 <div className="flex justify-between items-center mb-2">
-                    <label htmlFor="pencil-slider" className="font-semibold text-gray-700">Pencil Sketch Detail</label>
+                    <label htmlFor="pencil-slider" className="font-semibold text-gray-700">{t('pencilSketchLabel')}</label>
                     <span className="text-sm font-medium text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full">{pencilDetail}</span>
                 </div>
                 <input
@@ -195,9 +198,9 @@ const App: React.FC = () => {
                     {originalImagePreview && (
                         <>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl">
-                                <ImageDisplay title="Original Image" imageUrl={originalImagePreview} altText="User uploaded original" />
+                                <ImageDisplay titleKey="originalImageTitle" imageUrl={originalImagePreview} altText="User uploaded original" />
                                 <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
-                                    <h3 className="text-lg font-semibold text-gray-700 p-4 bg-gray-50 border-b">Watercolor Version</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700 p-4 bg-gray-50 border-b">{t('watercolorVersionTitle')}</h3>
                                     <div className="p-4 flex-grow flex items-center justify-center min-h-[200px]">
                                         {isProcessing && <Spinner />}
                                         {processState === ProcessState.SUCCESS && watercolorImage && (
@@ -205,7 +208,7 @@ const App: React.FC = () => {
                                         )}
                                         {!isProcessing && !watercolorImage && (
                                             <div className="text-center text-gray-500">
-                                                <p>Your painting will appear here.</p>
+                                                <p>{t('paintingPlaceholder')}</p>
                                             </div>
                                         )}
                                     </div>
@@ -217,16 +220,16 @@ const App: React.FC = () => {
                                 <div className="flex items-center gap-4">
                                    <Button onClick={handleConvertClick} disabled={isProcessing}>
                                        <WandIcon />
-                                       {isProcessing ? 'Converting...' : 'Convert to Watercolor'}
+                                       {isProcessing ? t('convertingButton') : t('convertButton')}
                                    </Button>
                                     {processState === ProcessState.SUCCESS && watercolorImage && (
                                         <Button onClick={handleDownload} variant="secondary">
                                             <DownloadIcon />
-                                            Download Image
+                                            {t('downloadButton')}
                                         </Button>
                                     )}
                                    <Button onClick={handleReset} variant="secondary" disabled={isProcessing}>
-                                       Start Over
+                                       {t('startOverButton')}
                                    </Button>
                                 </div>
                             </div>
@@ -235,7 +238,7 @@ const App: React.FC = () => {
                 </div>
             </main>
             <footer className="w-full text-center p-4 text-gray-500 text-sm">
-                <p>Powered by Google Gemini</p>
+                <p>{t('footerText')}</p>
             </footer>
         </div>
     );

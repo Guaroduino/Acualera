@@ -110,15 +110,18 @@ export const convertToWatercolor = async (
             // Check for safety ratings or other reasons for no image
             const textResponse = response.text?.trim();
             if(textResponse) {
-                throw new Error(`API returned text instead of an image: ${textResponse}`);
+                // Throw key for translation
+                throw new Error('errorApiTextResponse');
             }
-            throw new Error('The API did not return an image. The content may have been blocked.');
+             // Throw key for translation
+            throw new Error('errorApiNoImage');
         }
     } catch (error) {
         console.error('Error calling Gemini API:', error);
-        if (error instanceof Error) {
-            throw new Error(`Failed to generate watercolor image: ${error.message}`);
+        if (error instanceof Error && (error.message as string).startsWith('errorApi')) {
+             throw error; // Re-throw our custom error keys
         }
-        throw new Error('An unknown error occurred while generating the watercolor image.');
+        // Throw a generic key for other errors
+        throw new Error('errorApiUnknown');
     }
 };

@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { useLocalization } from '../contexts/LocalizationContext';
 
 interface ImageUploaderProps {
     onImageUpload: (file: File) => void;
@@ -13,6 +14,7 @@ const UploadIcon = () => (
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, disabled }) => {
     const [isDragging, setIsDragging] = useState(false);
+    const { t } = useLocalization();
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -60,10 +62,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, disabled }
                     <div className="flex flex-col items-center justify-center text-center">
                        <UploadIcon />
                         <span className="font-medium text-gray-600">
-                            Drop files to Attach, or
-                            <span className="text-indigo-600 underline ml-1">browse</span>
+                            {t('uploaderPrompt')}{' '}
+                            <span className="text-indigo-600 underline">{t('uploaderBrowse')}</span>
                         </span>
-                         <p className="text-sm text-gray-500 mt-1">PNG, JPG, WEBP accepted</p>
+                         <p className="text-sm text-gray-500 mt-1">{t('uploaderAcceptedFiles')}</p>
                     </div>
                 </span>
                 <input

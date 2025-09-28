@@ -1,4 +1,6 @@
 import React from 'react';
+import LanguageSelector from './LanguageSelector';
+import { useLocalization } from '../contexts/LocalizationContext';
 
 const PaintBrushIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
@@ -9,15 +11,18 @@ const PaintBrushIcon = () => (
 
 
 const Header: React.FC = () => {
+    const { t } = useLocalization();
+
     return (
-        <header className="w-full text-center py-6 bg-white shadow-md">
+        <header className="relative w-full text-center py-6 bg-white shadow-md">
+            <LanguageSelector />
             <div className="flex items-center justify-center gap-3">
                 <PaintBrushIcon />
                 <h1 className="text-3xl font-bold text-gray-800">
-                    Watercolor AI Painter
+                    {t('headerTitle')}
                 </h1>
             </div>
-            <p className="text-gray-500 mt-1">Transform your photos into timeless watercolor art.</p>
+            <p className="text-gray-500 mt-1">{t('headerSubtitle')}</p>
         </header>
     );
 };
