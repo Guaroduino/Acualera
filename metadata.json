@@ -1,0 +1,5 @@
+{
+  "name": "Watercolor AI Painter",
+  "description": "An application that transforms your photos into beautiful watercolor paintings using the Gemini API. Upload an image and watch the magic happen.",
+  "requestFramePermissions": []
+}
